@@ -1,0 +1,233 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  --font-noto: 'Noto Sans KR', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+body {
+  font-family: var(--font-noto);
+  color: #ffffff;
+  transition: background-color 0.4s ease;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+/* Ticker scroll animation */
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Card entrance animation */
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse animation for live indicators */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scale in for modals */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide up for mobile bottom sheet */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Slide down */
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Glow pulse for hot badges */
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+  }
+}
+
+/* Shimmer for Korean player highlights */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Promo banner slide */
+@keyframes promoSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Bet added pulse */
+@keyframes betPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ticker-track {
+  animation: ticker-scroll 30s linear infinite;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+.card-enter {
+  animation: card-enter 0.4s ease forwards;
+}
+
+.live-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.modal-overlay {
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  animation: scaleIn 0.25s ease;
+}
+
+.bottom-sheet {
+  animation: slideUp 0.3s ease;
+}
+
+.hot-badge {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.promo-enter {
+  animation: promoSlide 0.5s ease;
+}
+
+.bet-added {
+  animation: betPulse 0.3s ease;
+}
+
+/* Odds button hover */
+.odds-btn {
+  transition: all 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.odds-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.2);
+}
+.odds-btn:active {
+  transform: translateY(0);
+}
+
+/* Mode transition */
+.mode-transition {
+  transition: background-color 0.4s ease, color 0.3s ease;
+}
+
+/* Language transition */
+.lang-transition {
+  transition: opacity 0.2s ease;
+}
+
+/* Responsive: hide/show bet slip */
+@media (max-width: 768px) {
+  .desktop-betslip {
+    display: none !important;
+  }
+  .mobile-betslip-fab {
+    display: flex !important;
+  }
+}
