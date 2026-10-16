@@ -1,7 +1,10 @@
 'use client';
 
-import MainApp from '@/components/MainApp';
+import dynamic from 'next/dynamic';
 
-export default function Home() {
-  return <MainApp />;
+// Client-only: the demo reads localStorage and the theme attribute on mount.
+const App = dynamic(() => import('../demo/App'), { ssr: false });
+
+export default function Page() {
+  return <App />;
 }
