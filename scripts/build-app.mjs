@@ -19,7 +19,7 @@ const out = await build({
   outdir: 'dist',
   jsx: 'automatic',
   loader: { '.js': 'jsx' },
-  define: { 'process.env.NODE_ENV': '"production"', 'process.env.NEXT_PUBLIC_DEMO': '""' },
+  define: { 'process.env.NODE_ENV': '"production"', 'process.env.NEXT_PUBLIC_DEMO': JSON.stringify(process.env.HANPAN_DEMO || '') },
   target: 'es2020',
   plugins: [memoryNav],
 });

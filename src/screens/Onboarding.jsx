@@ -11,7 +11,7 @@ export function DemoNote() {
   const { L } = useStore();
   return (
     <p className="demo-ribbon">
-      <b>{L('Product demo', '제품 데모')}</b> · {L('Sample data. Nothing here is real money, and your activity stays on this device.', '샘플 데이터입니다. 실제 돈은 오가지 않으며 활동 기록은 이 기기에만 저장됩니다.')} · <a href="https://www.5thelementdigital.com" target="_blank" rel="noopener noreferrer">5th Element Digital</a>
+      <b>{L('Product demo', '제품 데모')}</b> · {L('Sample data. Nothing here is real money, and your activity stays on this device.', '샘플 데이터입니다. 실제 돈은 오가지 않으며 활동 기록은 이 기기에만 저장됩니다.')}
     </p>
   );
 }
