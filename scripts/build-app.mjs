@@ -1,9 +1,18 @@
-// Bundles the demo into one self-contained HTML file: dist/hanpan-demo.html
+// Bundles the app into one self-contained HTML file (dist/hanpan.html) that
+// runs without Next.js, using an in-memory router instead of URLs.
 import { build } from 'esbuild';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const memoryNav = {
+  name: 'memory-nav',
+  setup(b) {
+    b.onResolve({ filter: /lib\/nav$/ }, () => ({ path: resolve('src/lib/nav-memory.jsx') }));
+  },
+};
 
 const out = await build({
-  entryPoints: ['src/demo/entry.jsx'],
+  entryPoints: ['src/entry.jsx'],
   bundle: true,
   minify: true,
   write: false,
@@ -12,6 +21,7 @@ const out = await build({
   loader: { '.js': 'jsx' },
   define: { 'process.env.NODE_ENV': '"production"' },
   target: 'es2020',
+  plugins: [memoryNav],
 });
 const js = out.outputFiles.find((f) => f.path.endsWith('.js')).text.replace(/<\/script/gi, '<\\/script');
 const css = out.outputFiles.find((f) => f.path.endsWith('.css')).text;
@@ -25,5 +35,5 @@ const html = `<title>Hanpan 한판</title>
 <script>${js}</script>
 `;
 mkdirSync('dist', { recursive: true });
-writeFileSync('dist/hanpan-demo.html', html);
-console.log('wrote dist/hanpan-demo.html', (html.length / 1024).toFixed(0) + ' KB');
+writeFileSync('dist/hanpan.html', html);
+console.log('wrote dist/hanpan.html', (html.length / 1024).toFixed(0) + ' KB');

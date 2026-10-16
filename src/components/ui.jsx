@@ -1,14 +1,10 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { users } from './data';
+'use client';
 
-export const AppCtx = createContext(null);
-export const useApp = () => useContext(AppCtx);
-
-// L('English', '한국어') or L({ en, kr })
-export function useL() {
-  const { lang } = useApp();
-  return (a, b) => (typeof a === 'object' && a ? a[lang] ?? a.en : lang === 'kr' && b != null ? b : a);
-}
+import { useEffect, useMemo, useState } from 'react';
+import { useL, useStore } from '../lib/store';
+import { Link } from '../lib/nav';
+import { series } from '../lib/time';
+import { users, botNames } from '../data/content';
 
 const paths = {
   home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
@@ -38,8 +34,6 @@ const paths = {
   send: 'M22 2 11 13M22 2l-7 20-4-9-9-4z',
   plus: 'M12 5v14M5 12h14',
   live: 'M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm-4.2 2.2a6 6 0 0 1 0-8.4m8.4 0a6 6 0 0 1 0 8.4M4.9 19.1a10 10 0 0 1 0-14.2m14.2 0a10 10 0 0 1 0 14.2',
-  sun: 'M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM12 1v2m0 18v2M4.2 4.2l1.4 1.4m12.8 12.8 1.4 1.4M1 12h2m18 0h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4',
-  moon: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z',
   link: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7',
   trend: 'm22 7-8.5 8.5-5-5L2 17M16 7h6v6',
   sparkle: 'M12 3v4m0 10v4M3 12h4m10 0h4M6 6l2.5 2.5m7 7L18 18M6 18l2.5-2.5m7-7L18 6',
@@ -47,14 +41,20 @@ const paths = {
   settings: 'M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6',
   image: 'M3 5h18v14H3zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM21 15l-5-5L5 19',
   poll: 'M4 20h4V10H4zm6 0h4V4h-4zm6 0h4v-7h-4z',
-  wallet: 'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm0 0V6a2 2 0 0 1 2-2h11v3m1 6.5h.01',
+  ball: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM5.6 4.4c2 2.2 2 13 0 15.2M18.4 4.4c-2 2.2-2 13 0 15.2',
+  won: 'M4 6l3.5 12L12 8l4.5 10L20 6M3 11h18M3 14h18',
+  flag: 'M4 22V4m0 0h13l-2 4 2 4H4',
+  clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm0-15v5l3 2',
+  info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm0-6v-5m0-3h.01',
+  copy: 'M9 9h11v11H9zM5 15H4V4h11v1',
+  swap: 'M7 4 3 8l4 4M3 8h14m0 12 4-4-4-4m4 4H7',
 };
 
 export function Icon({ name, size = 20, stroke = 1.8, fill = 'none', className = '' }) {
   return (
     <svg className={`ic ${className}`} width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor"
       strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={paths[name]} />
+      <path d={paths[name] || paths.info} />
     </svg>
   );
 }
@@ -64,52 +64,37 @@ export function Logo({ size = 22 }) {
     <span className="logo" style={{ fontSize: size }}>
       <span className="logo-mark" aria-hidden="true">
         <svg viewBox="0 0 32 32" width={size + 6} height={size + 6}>
-          <circle cx="16" cy="16" r="15" fill="var(--ink)" />
           <path d="M16 1a15 15 0 0 1 0 30 7.5 7.5 0 0 1 0-15 7.5 7.5 0 0 0 0-15Z" fill="var(--persimmon)" />
           <path d="M16 1a7.5 7.5 0 0 1 0 15 7.5 7.5 0 0 0 0 15A15 15 0 0 1 16 1Z" fill="var(--jade)" />
         </svg>
       </span>
       <span className="logo-kr">한판</span>
-      <span className="logo-en">Hanpan</span>
     </span>
   );
+}
+
+export function nameOf(id, s) {
+  if (id === 'me') return s?.profile.name || 'You';
+  return users[id]?.name || botNames[id] || id;
 }
 
 export function Avatar({ id, size = 36 }) {
-  const u = users[id] || { name: id };
+  const { s } = useStore();
+  const name = nameOf(id, s);
   let h = 0;
-  for (const c of id) h = (h * 31 + c.charCodeAt(0)) % 360;
-  const initials = u.name.split(' ').map((s) => s[0]).join('').slice(0, 2);
+  for (const c of id === 'me' ? name : id) h = (h * 31 + c.charCodeAt(0)) % 360;
+  const initials = name.split(/\s+/).map((w) => [...w][0]).join('').slice(0, 2).toUpperCase();
   return (
-    <span className="avatar" style={{ width: size, height: size, fontSize: size * 0.38, background: `hsl(${h} 42% 46%)` }}>
-      {initials}
+    <span className="avatar" style={{ width: size, height: size, fontSize: size * 0.38, background: id === 'me' ? 'var(--ink)' : `hsl(${h} 42% 46%)`, color: id === 'me' ? 'var(--bg)' : '#fff' }}>
+      {initials || '?'}
     </span>
   );
-}
-
-// Deterministic price history that ends at the current price.
-function rng(seed) {
-  let s = 0;
-  for (const c of seed) s = (s * 33 + c.charCodeAt(0)) >>> 0;
-  return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
-}
-export function series(seed, end, chg, n = 48) {
-  const r = rng(seed);
-  const start = Math.max(3, Math.min(97, end - chg * 2.2 + (r() - 0.5) * 10));
-  const out = [];
-  let v = start;
-  for (let i = 0; i < n; i++) {
-    const target = start + ((end - start) * i) / (n - 1);
-    v = v + (target - v) * 0.35 + (r() - 0.5) * 5;
-    out.push(Math.max(1, Math.min(99, v)));
-  }
-  out[n - 1] = end;
-  return out;
 }
 
 export function Sparkline({ seed, end, chg, w = 84, h = 30 }) {
   const pts = useMemo(() => series(seed, end, chg, 28), [seed, end, chg]);
-  const min = Math.min(...pts) - 2, max = Math.max(...pts) + 2;
+  const min = Math.min(...pts) - 2;
+  const max = Math.max(...pts) + 2;
   const xy = pts.map((v, i) => [(i / (pts.length - 1)) * w, h - ((v - min) / (max - min)) * h]);
   const d = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join('');
   const cls = chg >= 0 ? 'up' : 'down';
@@ -122,32 +107,35 @@ export function Sparkline({ seed, end, chg, w = 84, h = 30 }) {
   );
 }
 
-export function PriceChart({ seed, end, chg }) {
+// Line chart with axis labels. `unit` formats tick labels; `pts` overrides the generated series.
+export function LineChart({ seed, end, chg, unit = (v) => `${Math.round(v)}¢`, pts: given, step = 10, labels: lbl }) {
   const [range, setRange] = useState('1W');
   const n = { '1D': 24, '1W': 48, '1M': 60, ALL: 90 }[range];
-  const pts = useMemo(() => series(seed + range, end, chg * (n / 48), n), [seed, end, chg, range, n]);
-  const W = 340, H = 150, padL = 4, padR = 34, padT = 10, padB = 18;
-  const lo = Math.max(0, Math.floor((Math.min(...pts) - 4) / 10) * 10);
-  const hi = Math.min(100, Math.ceil((Math.max(...pts) + 4) / 10) * 10);
+  const pts = useMemo(() => given ? given(range, n) : series(seed + range, end, chg * (n / 48), n), [seed, end, chg, range, n, given]);
+  const W = 340, H = 150, padL = 4, padR = 44, padT = 10, padB = 18;
+  const lo = Math.floor((Math.min(...pts) - step * 0.4) / step) * step;
+  const hi = Math.ceil((Math.max(...pts) + step * 0.4) / step) * step;
   const x = (i) => padL + (i / (pts.length - 1)) * (W - padL - padR);
   const y = (v) => padT + (1 - (v - lo) / (hi - lo)) * (H - padT - padB);
   const d = pts.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
   const ticks = [];
-  for (let t = lo; t <= hi; t += (hi - lo) / 4) ticks.push(Math.round(t));
-  const labels = { '1D': ['9a', '3p', 'now'], '1W': ['Fri', 'Tue', 'now'], '1M': ['Sep 16', 'Oct 1', 'now'], ALL: ['Jul', 'Sep', 'now'] }[range];
+  for (let t = lo; t <= hi + 1e-9; t += (hi - lo) / 4) ticks.push(t);
+  const labels = lbl || { '1D': ['9a', '3p', 'now'], '1W': ['7d ago', '3d', 'now'], '1M': ['30d ago', '15d', 'now'], ALL: ['90d ago', '45d', 'now'] }[range];
+  const dir = pts.at(-1) >= pts[0] ? 'up' : 'down';
+  const last = pts.at(-1);
   return (
     <div className="chart">
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={`Price history, now ${end} cents`}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={`Chart, now ${unit(last)}`}>
         {ticks.map((t) => (
           <g key={t}>
             <line x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} className="grid" />
-            <text x={W - padR + 6} y={y(t) + 3.5} className="axis">{t}¢</text>
+            <text x={W - padR + 6} y={y(t) + 3.5} className="axis">{unit(t)}</text>
           </g>
         ))}
-        <path d={`${d}L${x(pts.length - 1)},${H - padB}L${padL},${H - padB}Z`} className={`area ${chg >= 0 ? 'up' : 'down'}`} />
-        <path d={d} className={`line ${chg >= 0 ? 'up' : 'down'}`} fill="none" />
-        <circle cx={x(pts.length - 1)} cy={y(end)} r="7" className={`pulse ${chg >= 0 ? 'up' : 'down'}`} />
-        <circle cx={x(pts.length - 1)} cy={y(end)} r="3.5" className={`dot ${chg >= 0 ? 'up' : 'down'}`} />
+        <path d={`${d}L${x(pts.length - 1)},${H - padB}L${padL},${H - padB}Z`} className={`area ${dir}`} />
+        <path d={d} className={`line ${dir}`} fill="none" />
+        <circle cx={x(pts.length - 1)} cy={y(last)} r="7" className={`pulse ${dir}`} />
+        <circle cx={x(pts.length - 1)} cy={y(last)} r="3.5" className={`dot ${dir}`} />
         {labels.map((l, i) => (
           <text key={l} x={padL + (i / 2) * (W - padL - padR)} y={H - 3} className="axis" textAnchor={i === 0 ? 'start' : i === 2 ? 'end' : 'middle'}>{l}</text>
         ))}
@@ -161,25 +149,23 @@ export function PriceChart({ seed, end, chg }) {
   );
 }
 
-export function Chg({ v }) {
-  return <span className={`chg ${v >= 0 ? 'up' : 'down'}`}>{v >= 0 ? '▲' : '▼'}{Math.abs(v)}</span>;
+export function Chg({ v, suffix = '' }) {
+  return <span className={`chg ${v >= 0 ? 'up' : 'down'}`}>{v >= 0 ? '▲' : '▼'}{Math.abs(v)}{suffix}</span>;
 }
 
 export function SrcBadge({ src }) {
   const L = useL();
   return src === 'kalshi'
     ? <span className="badge badge-kalshi">Kalshi</span>
-    : <span className="badge badge-comm">{L('Community · pts', '커뮤니티 · 포인트')}</span>;
+    : <span className="badge badge-comm">{L('Community · points', '커뮤니티 · 포인트')}</span>;
 }
 
-export function Sheet({ open, onClose, children, title, full }) {
+export function Sheet({ onClose, children, title, full }) {
   useEffect(() => {
-    if (!open) return;
     const k = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', k);
     return () => window.removeEventListener('keydown', k);
-  }, [open, onClose]);
-  if (!open) return null;
+  }, [onClose]);
   return (
     <div className="sheet-wrap" role="dialog" aria-modal="true" aria-label={title}>
       <div className="scrim" onClick={onClose} />
@@ -203,4 +189,37 @@ export function Toggle({ on, onChange, id, label }) {
   );
 }
 
-export const fmt = (n) => n.toLocaleString('en-US');
+export function SecHead({ title, action, onAction, to }) {
+  return (
+    <div className="sec-head">
+      <h2 className="h2">{title}</h2>
+      {action && (to ? <LinkLike to={to}>{action}</LinkLike> : <button className="link" onClick={onAction}>{action}</button>)}
+    </div>
+  );
+}
+
+function LinkLike({ to, children }) {
+  return <Link className="link" to={to}>{children}</Link>;
+}
+
+// Share via the Web Share sheet (KakaoTalk, Messages, Instagram appear there on phones),
+// falling back to copying the link.
+export async function shareLink({ title, text, path, L, notify, onShared }) {
+  const url = `https://hanpan.app${path || ''}`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title, text, url });
+      onShared?.();
+      return;
+    }
+  } catch (e) {
+    if (e?.name === 'AbortError') return;
+  }
+  try {
+    await navigator.clipboard.writeText(`${text}\n${url}`);
+    notify(L('Link copied. Paste it in KakaoTalk.', '링크 복사됨. 카카오톡에 붙여넣으세요.'));
+    onShared?.();
+  } catch {
+    notify(url);
+  }
+}
