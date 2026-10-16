@@ -5,6 +5,17 @@ import { useStore, WELCOME_BONUS } from '../lib/store';
 import { Icon, Logo } from '../components/ui';
 import { cities, interests, athletes } from '../data/content';
 
+export const IS_DEMO = !!process.env.NEXT_PUBLIC_DEMO;
+
+export function DemoNote() {
+  const { L } = useStore();
+  return (
+    <p className="demo-ribbon">
+      <b>{L('Product demo', '제품 데모')}</b> · {L('Sample data. Nothing here is real money, and your activity stays on this device.', '샘플 데이터입니다. 실제 돈은 오가지 않으며 활동 기록은 이 기기에만 저장됩니다.')} · <a href="https://www.5thelementdigital.com" target="_blank" rel="noopener noreferrer">5th Element Digital</a>
+    </p>
+  );
+}
+
 export default function Onboarding() {
   const { L, s, actions, update } = useStore();
   const [step, setStep] = useState(0);
@@ -39,6 +50,7 @@ export default function Onboarding() {
 
       {step === 0 && (
         <div className="onb-hero">
+          {IS_DEMO && <DemoNote />}
           <Logo size={34} />
           <h1 className="onb-title">{L('Your people. Your teams. Your calls.', '우리 사람들. 우리 팀. 우리의 예측.')}</h1>
           <p className="lead">{L('The Korean-American home for sports, money and culture. Follow Korean athletes, track the won, watch games together, and prove you called it.', '스포츠, 재테크, 문화를 위한 한인 커뮤니티. 한국 선수 응원, 환율 체크, 함께 경기 보기, 그리고 예측 실력 증명까지.')}</p>

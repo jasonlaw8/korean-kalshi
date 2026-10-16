@@ -8,6 +8,7 @@ import { Icon, Avatar, Toggle, SecHead, shareLink } from '../components/ui';
 import { cities, interests, lessons } from '../data/content';
 import { advertisers, perks } from '../data/ads';
 import { useSheet } from '../components/sheets';
+import { IS_DEMO, DemoNote } from './Onboarding';
 
 export default function Me() {
   const { L, s, now } = useStore();
@@ -90,6 +91,7 @@ export default function Me() {
       <Upcoming />
 
       <Link to="/settings" className="btn btn-ghost btn-block"><Icon name="settings" size={16} /> {L('Settings', '설정')}</Link>
+      {IS_DEMO && <DemoNote />}
     </div>
   );
 }

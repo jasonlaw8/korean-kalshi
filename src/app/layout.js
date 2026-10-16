@@ -1,9 +1,12 @@
 import '../styles.css';
 import App from '../App';
 
+const isDemo = !!process.env.NEXT_PUBLIC_DEMO;
+
 export const metadata = {
-  title: 'Hanpan 한판',
+  title: isDemo ? 'Hanpan 한판 · Demo' : 'Hanpan 한판',
   description: 'The Korean-American home for sports, the won, and predictions.',
+  ...(isDemo ? { robots: { index: false, follow: false } } : {}),
 };
 
 export const viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover' };

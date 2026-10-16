@@ -747,3 +747,5 @@ a { color: inherit; text-decoration: none; }
 .confirm { display: flex; flex-direction: column; gap: 10px; background: var(--persimmon-soft); padding: 14px; border-radius: var(--r); font-size: 14px; }
 .confirm .btn-ghost { flex: 1; }
 .daily5-dots i.lost { background: #FF9C82; }
+.demo-ribbon { font-size: 12px; line-height: 1.5; color: var(--ink-soft); background: var(--surface-2); border-radius: 12px; padding: 8px 12px; }
+.demo-ribbon a { color: var(--jade); font-weight: 700; }
